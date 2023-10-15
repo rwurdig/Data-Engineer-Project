@@ -28,3 +28,9 @@ RankedData AS (
 SELECT region, datasource, latest_datetime
 FROM RankedData
 WHERE rank = 1;
+
+-- Weekly Average Number of Trips
+SELECT AVG(num_trips), EXTRACT(WEEK FROM created_at) as week
+FROM datatrip
+WHERE ST_Within(origin_coord, ST_GeomFromText('POLYGON((...))'))
+GROUP BY week;

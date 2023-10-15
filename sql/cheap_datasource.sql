@@ -1,4 +1,4 @@
--- SQL Query to Fetch Distinct Regions from raw_tripsdata Where Datasource is 'cheap_mobile'
+-- SQL Query to Fetch Distinct Regions from raw_datatrips Where Datasource is 'cheap_mobile'
 -- Using CTE for better modularity and future extensions
 
 WITH FilteredData AS (
