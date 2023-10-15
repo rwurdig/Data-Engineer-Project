@@ -1,0 +1,48 @@
+# Database Migrations
+alembic==1.7.3
+
+# Web Frameworks
+Flask==2.1.1
+Flask-Migrate==3.1.0
+Flask-RESTful==0.3.10
+Flask-SQLAlchemy==2.5.1
+
+# Web Server
+gunicorn==20.1.0
+
+# Database Drivers
+psycopg2==2.9.3
+psycopg2-binary==2.9.3
+
+# Date and Time
+aniso8601==9.0.1
+python-dateutil==2.8.2
+pytz==2021.3
+
+# HTTP Libraries
+requests==2.26.0
+urllib3==1.26.7
+certifi==2021.10.8
+chardet==4.0.0
+idna==3.3
+
+# Utility
+Click==8.0.3
+itsdangerous==2.1.0
+six==1.16.0
+
+# Template Engine
+Jinja2==3.0.3
+MarkupSafe==2.1.0
+
+# Text Editor
+python-editor==1.0.4
+
+# Caching
+redis==4.1.2
+
+# Web Server Gateway Interface
+Werkzeug==2.1.0
+
+# Markup Language
+Mako==1.1.6
