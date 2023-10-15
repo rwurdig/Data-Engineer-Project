@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 import logging
 
 # Initialize logger
@@ -8,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 # Globally accessible libraries
 db = SQLAlchemy()
+socketio = SocketIO()
 
 def create_app():
     """Initialize the core application."""
@@ -20,6 +22,7 @@ def create_app():
 
         # Initialize Plugins
         db.init_app(app)
+        socketio.init_app(app)  # Initialize SocketIO
 
         with app.app_context():
             # Include our Routes
