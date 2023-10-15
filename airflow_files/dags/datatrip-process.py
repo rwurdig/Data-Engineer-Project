@@ -1,11 +1,12 @@
 # Import Required Libraries
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.dummy import DummyOperator 
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.apache.hdfs.sensors.hdfs import HdfsSensor
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
+import psycopg2
 
 # Parameters
 spark_master = "spark://spark-master:7077"
@@ -18,7 +19,7 @@ default_args = {
     "depends_on_past": False,
     "start_date": datetime(now.year, now.month, now.day),
     "email": ["airflow@airflow.com"],
-    "email_on_failure": True,  # Email notifications
+    "email_on_failure": True,
     "email_on_retry": False,
     "retries": 1,
     "is_paused_upon_creation": False,
@@ -34,9 +35,7 @@ dag = DAG(
     catchup=False,
 )
 
-# Python Functions
-import psycopg2
-
+# Python Functions for Data Ingestion and Validation
 def ingest_data_into_sql():
     conn = psycopg2.connect(
         host="your_host",
@@ -79,8 +78,8 @@ def validate_data():
     conn.close()
 
 # Dummy Operators
-start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
-end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
+start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
+end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
 # Python Operators
 ingest_operator = PythonOperator(
@@ -99,7 +98,8 @@ validate_operator = PythonOperator(
 landing_zone = HdfsSensor(
     task_id='landing_zone',
     filepath='/data/raw/datatrip',
-    hdfs_conn_id='hdfs_default'
+    hdfs_conn_id='hdfs_default',
+    dag=dag
 )
 
 # Spark Jobs
@@ -113,7 +113,8 @@ second_layer_processing_job = SparkSubmitOperator(
     application_args=[],
     executor_memory="2G",
     executor_cores=1,
-    num_executors=1
+    num_executors=1,
+    dag=dag
 )
 
 third_layer_processing_job = SparkSubmitOperator(
@@ -126,20 +127,23 @@ third_layer_processing_job = SparkSubmitOperator(
     application_args=[],
     executor_memory="2G",
     executor_cores=1,
-    num_executors=1
+    num_executors=1,
+    dag=dag
 )
 
 # Postgres Operators
 trip_table_creation = PostgresOperator(
     task_id="trip_table_creation",
     postgres_conn_id="postgres_default",
-    sql="sql/datatrip_schema.sql"
+    sql="sql/datatrip_schema.sql",
+    dag=dag
 )
 
 trip_table_loading = PostgresOperator(
     task_id="trip_table_loading",
     postgres_conn_id="postgres_default",
-    sql="INSERT INTO datatrip SELECT * FROM staging_tripdata;"
+    sql="INSERT INTO datatrip SELECT * FROM staging_tripdata;",
+    dag=dag
 )
 
 # DAG dependencies
