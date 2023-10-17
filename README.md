@@ -22,24 +22,28 @@ The pipeline also includes a Flask API to expose the data stored in PostgreSQL.
 git clone https://github.com/rwurdig/Data-Engineer-Project.git
 ````
 
-4. Open you terminal in linux / prompt in windows
-5. Drive into the Data-Engineer-Project directory:
+4. Open Terminal: Open your terminal if you're using a Linux-based system or Command Prompt if you're on Windows.
+5. Navigate to Project Directory: Change your current directory to where the Data-Engineer-Project is located.
 
 ````
-cd Data-Engineer-Project
+cd path/to/Data-Engineer-Project
 ````
 
-6. Run the commands to start the containers (make sure you are in the same directory of docker-compose.yaml):
+6. Start Containers: Ensure you are in the directory containing the docker-compose.yaml file and execute the following command to start all the Docker containers.
 
 ````
-docker-compose up
+docker-compose up -d
 ````
-7. In the config, airflow is running in the port 8080 with user admin and password admin.
-8. Find the DAG trips-processing and click on the Play Button and after in Trigger Dag.
-9. Wait for the DAG sensor starts to listen to the HDFS directory.
-10. If you are using Linux, open another terminal, drive into the Data-Engineer-Project folder and run the command:
+7. Airflow Configuration: By default, Airflow is configured to run on port 8080. You can log in using the username admin and password admin.
+8. Trigger Airflow DAG: In the Airflow UI, locate the DAG named trips-processing. Click on the "Play" button and then on "Trigger DAG".
+9. Activate HDFS Sensor: Wait until the DAG sensor starts listening to the HDFS directory for incoming data.
+10. Data Ingestion:
+Linux: Open another terminal, navigate to the Data-Engineer-Project directory, and run the appropriate script.
+Windows: Navigate to the Data-Engineer-Project directory and execute the .bat file.
 ````
-make add-file
+# Run the data ingestion script
+./your-script.sh  # For Linux
+your-script.bat   # For Windows
 ````
 If you are using Windows, drive into the Data-Engineer-Project and run the .bat:
 ````
@@ -54,14 +58,13 @@ docker exec hadoop-namenode powershell.exe -Command "hadoop fs -copyFromLocal /t
 
 ````
 
-11. If you want to run the spark to test something, you can do this by:
+11. Spark Testing: If you wish to run Spark for testing:
+
 ````
 docker exec -it spark-master bash
 ````
-For pyspark:
-``pyspark`` For scala-spark: ``spark-shell``
 
-12.The DAG will execute in the following sequence:
+12.DAG Execution: The DAG will execute tasks in a predefined sequence. Monitor its progress and wait for it to complete.
 ````
                   +-----------------------+
                   |                       |
@@ -114,9 +117,9 @@ For pyspark:
 
 Wait for it to finish the execution.
 
-13.To check the Spark UI go: [http://localhost:8888](http://localhost:8888)
+13.Check Spark UI: To inspect the Spark jobs, navigate to [http://localhost:8888](http://localhost:8888)
 
-14.Connecting in to the PostgreSQL:
+14.PostgreSQL Connection: Connect to the PostgreSQL database using your preferred SQL client.
 
 ````
 docker exec -it jobsity-postgres bash
@@ -127,16 +130,15 @@ select * from data limit 10;
 select * from raw_data limit 10;
 ````
 
-15.Connect to the API to get weekly avg with a bounding box.
+15.API for Weekly Averages: To get the weekly average number of trips within a bounding box, make an API call to the Flask service.
 
 ````
 wget http://localhost:50555/
 ````
-Also, there is a table that can calculate this in the processing time
+Processing Time Table: There is also a table (avg_trips_region) that calculates the weekly averages during data processing
 ````
 select * from avg_s_region;
 ````
-
 
 ## Services and ports used in the project
 
@@ -195,40 +197,31 @@ Service: hadoop-datanode
 4. Implement in cloud infrastrucutre as we can see in the next section.
 ````
 
-# AWS Infra
+Azure Infrastructure
+For deploying this pipeline on Azure, the architecture would be as follows:
 
-![Infrastructure on AWS](/img/aws.png)
+Airflow on AKS: Deploy Apache Airflow on Azure Kubernetes Service (AKS) for orchestration.
 
-The proposed infrastructure for the data pipeline consists of various AWS services. Airflow would be deployed on Amazon Elastic Container Service (ECS), which is a fully-managed container orchestration service that allows us to run, stop, and manage Docker containers on a cluster. Airflow can be deployed in a Docker container on ECS and managed using Amazon Elastic Kubernetes Service (EKS).
+Azure Blob Storage: Use Azure Blob Storage as the data lake for raw and processed data.
 
-For storage, we would use Amazon Simple Storage Service (S3), which is an object storage service that offers industry-leading scalability, data availability, security, and performance. We can store the input data files on S3 and create an S3 notification event that will trigger the DAG when a new file is uploaded.
+Azure Database for PostgreSQL: Utilize this managed service for your PostgreSQL database needs.
 
-The database would be an Amazon Relational Database Service (RDS), which is a managed database service that makes it easy to set up, operate, and scale a relational database in the cloud. We can use PostgreSQL as the database for storing the processed data.
+Azure Cache for Redis: Provision Redis as a managed service for caching and fast data retrieval.
 
-To cache and store the results of intermediate computations, we can use Amazon ElastiCache for Redis, which is an in-memory data store that provides low-latency access to frequently requested data.
+Spark on HDInsight: Deploy your Spark cluster on Azure HDInsight for data processing.
 
-For big data processing, we can use Amazon Elastic MapReduce (EMR), which is a fully-managed big data processing service that makes it easy to process large amounts of data using Spark, Hadoop, or other big data frameworks. We can create and destroy EMR clusters on the DAG to avoid having a Spark cluster always on, which can help reduce costs.
+Event-Driven Architecture: Utilize Azure Event Grid to trigger the Airflow DAG whenever a new file is uploaded to Blob Storage. This eliminates the need for polling and makes the system more reactive.
 
-To trigger the DAG whenever a new file is uploaded to S3, we can create an S3 notification event using Amazon Simple Notification Service (SNS), which is a flexible, fully-managed pub/sub messaging and mobile notifications service for coordinating the delivery of messages to subscribing endpoints.
+Dynamic HDInsight Clusters: To optimize costs, create DAGs that dynamically spin up HDInsight clusters when heavy computation is needed and tear them down afterward.
 
-Overall, this infrastructure is highly scalable and flexible, making it well-suited to handle large volumes of data and accommodate future growth.
+Azure Data Factory: For additional data orchestration and ETL processes, Azure Data Factory can be integrated into the pipeline.
 
-
-# Azure Infra
-
-![Infrastructure on Azure](/img/Azure.png)
-
-The proposed infrastructure on Azure would involve deploying Airflow on Azure Kubernetes Service (AKS), using Azure Blob Storage as the storage solution, and Azure Database for PostgreSQL as the database. Redis could be provisioned as a managed service, such as Azure Cache for Redis, and the Spark Cluster could be deployed on Azure HDInsight.
-
-We could also use Azure Event Grid to trigger the DAG when a new file is uploaded to Blob Storage. This would involve creating a Blob Storage trigger that would send an event to Event Grid, which in turn could trigger the DAG.
-
-Similar to AWS, we can also create and destroy HDInsight clusters as needed to avoid having a Spark cluster always on, and to minimize costs. This can be achieved by creating a DAG that spins up a new HDInsight cluster when needed and tears it down when it's no longer required. We can also make use of Azure Data Factory to orchestrate data movement and processing within the pipeline.
-
+By adopting this architecture, you can build a robust, scalable, and cost-effective data pipeline on Azure.
 # Bonus features
 
 • The solution is containerized
 
-• There are two different cloud solutions
+• There are a cloud solution.
 
 • There is a directory called SQL in the root of the project with both .sql files answering the questions:
 ````
@@ -239,7 +232,7 @@ What regions has the "cheap_mobile" datasource appeared in?
 
 # Explanation
 
-When you run ``docker-compose up`` inside the data-engineering-challenge directory, it will start the Docker with the services and ports configured as it was shown in the previous section.
+When you run ``docker-compose up`` inside the Data-Engineer-Project directory, it will start the Docker with the services and ports configured as it was shown in the previous section.
 
 The ``localhost:8080`` is configured to the webserver of the airflow UI, where we can start the dags and check if our ingestion and processing was finished.
 
