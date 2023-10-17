@@ -139,7 +139,6 @@ Processing Time Table: There is also a table (avg_trips_region) that calculates 
 ````
 select * from avg_s_region;
 ````
-
 ## Services and ports used in the project
 
 ````
@@ -187,49 +186,77 @@ Service: hadoop-datanode
   Internal Port: 50090
 
 ````
-
-
 # To do:
 ````
-1. Create a container with HashiCorp Vault and uses the vault to retrieve password for the server
-2. Upgrade the format parquet into delta-table and use mergeSchema in the tables to update the tables
-3. For simplicity, all the data is loaded at every execution, with delta-table we could upgrade to have a feature of incremental loads.
-4. Implement in cloud infrastrucutre as we can see in the next section.
+1. HashiCorp Vault for Secure Password Management
+Objective: Integrate HashiCorp Vault to securely manage and retrieve server passwords.
+Rationale: Storing passwords in plain text or environment variables is not secure. HashiCorp Vault provides a centralized way to manage secrets and sensitive data.
+Steps:
+- Create a Docker container running HashiCorp Vault.
+- Initialize and unseal the Vault.
+- Store the server password in the Vault.
+- Modify the application to retrieve the password from the Vault during runtime.
 ````
+# Example Docker command to run HashiCorp Vault
+docker run --name vault -p 8200:8200 vault
+````
+2. Upgrade to Delta-Table Format
+Objective: Migrate from Parquet to Delta-Table format and implement mergeSchema.
+Rationale: Delta-Tables provide ACID transactions, improve data reliability, and allow schema evolution.
+Steps:
+- Convert existing Parquet tables to Delta-Table format.
+- Implement mergeSchema to automatically update table schemas when new columns are added.
+````
+# PySpark code to convert Parquet to Delta-Table
+from delta.tables import DeltaTable
 
+DeltaTable.convertToDelta(spark, "parquet.`/path/to/table`")
+````
+3. Implement Incremental Loads
+Objective: Transition from full data loads to incremental data loads.
+Rationale: Loading all data at every execution is inefficient and time-consuming. Incremental loads will improve performance.
+Steps:
+- Identify a column (e.g., timestamp or ID) that can be used to filter new records.
+- Modify the ETL process to only load records that are new or updated since the last run.
+````
+# PySpark code for incremental load
+new_data = spark.read.table("new_data")
+deltaTable = DeltaTable.forPath(spark, "/path/to/delta-table")
+
+deltaTable.alias("old").merge(
+    new_data.alias("new"),
+    "old.id = new.id"
+).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+````
+4. Cloud Infrastructure Deployment
+Objective: Implement the entire data pipeline in a cloud infrastructure, as detailed in the subsequent section.
+Rationale: Cloud deployment offers scalability, high availability, and ease of management.
+Steps:
+Choose a cloud provider (AWS, Azure, GCP).
+Provision required services (e.g., Kubernetes, Databases, Storage).
+Deploy the application and data pipeline components.
+Test for performance and reliability.
+````
 Azure Infrastructure
 For deploying this pipeline on Azure, the architecture would be as follows:
-
-Airflow on AKS: Deploy Apache Airflow on Azure Kubernetes Service (AKS) for orchestration.
-
-Azure Blob Storage: Use Azure Blob Storage as the data lake for raw and processed data.
-
-Azure Database for PostgreSQL: Utilize this managed service for your PostgreSQL database needs.
-
-Azure Cache for Redis: Provision Redis as a managed service for caching and fast data retrieval.
-
-Spark on HDInsight: Deploy your Spark cluster on Azure HDInsight for data processing.
-
-Event-Driven Architecture: Utilize Azure Event Grid to trigger the Airflow DAG whenever a new file is uploaded to Blob Storage. This eliminates the need for polling and makes the system more reactive.
-
-Dynamic HDInsight Clusters: To optimize costs, create DAGs that dynamically spin up HDInsight clusters when heavy computation is needed and tear them down afterward.
-
-Azure Data Factory: For additional data orchestration and ETL processes, Azure Data Factory can be integrated into the pipeline.
-
+- Airflow on AKS: Deploy Apache Airflow on Azure Kubernetes Service (AKS) for orchestration.
+- Azure Blob Storage: Use Azure Blob Storage as the data lake for raw and processed data.
+- Azure Database for PostgreSQL: Utilize this managed service for your PostgreSQL database needs.
+- Azure Cache for Redis: Provision Redis as a managed service for caching and fast data retrieval.
+- Spark on HDInsight: Deploy your Spark cluster on Azure HDInsight for data processing.
+- Event-Driven Architecture: Utilize Azure Event Grid to trigger the Airflow DAG whenever a new file is uploaded to Blob Storage. This eliminates the need for polling and makes the system more reactive.
+- Dynamic HDInsight Clusters: To optimize costs, create DAGs that dynamically spin up HDInsight clusters when heavy computation is needed and tear them down afterward.
+- Azure Data Factory: For additional data orchestration and ETL processes, Azure Data Factory can be integrated into the pipeline.
 By adopting this architecture, you can build a robust, scalable, and cost-effective data pipeline on Azure.
 # Bonus features
-
 • The solution is containerized
-
 • There are a cloud solution.
-
 • There is a directory called SQL in the root of the project with both .sql files answering the questions:
 ````
 From the two most commonly appearing regions, which is the latest datasource?
 
 What regions has the "cheap_mobile" datasource appeared in?
 ````
-
 # Explanation
 
 When you run ``docker-compose up`` inside the Data-Engineer-Project directory, it will start the Docker with the services and ports configured as it was shown in the previous section.
@@ -256,15 +283,11 @@ Also, while everything is running, the hadoop, spark, and airflow are still runn
 ````
 docker exec -it spark-master bash
 ````
-
 Also, you can use the HDFS as a store. The ``Makefile`` and ``add-file.bat`` have examples of how to copy files to the hdfs such a csv, it is like:
 ````
 docker cp dataset\s.csv hadoop-namenode:\
 docker exec hadoop-namenode bash -c "hadoop dfs -mkdir -p hdfs:///data/landing/datatrip/"
 docker exec hadoop-namenode bash -c "hadoop fs -copyFromLocal /trips.csv hdfs:///data/landing/datatrip/trips.csv"
 ````
-
 You just have to pay attention in your OS, the commands can change a bit depending on the OS you are running.
 
-
-Since the tools and technologies used in this project are all focused on big data and everyone has it own prove of scalability, by the usage of spark and HDFS and since it is a distributed system, the scalability of the solution is proven by itself just by the usage of every technology here.
