@@ -23,10 +23,10 @@ git clone https://github.com/rwurdig/Data-Engineer-Project.git
 ````
 
 4. Open you terminal in linux / prompt in windows
-5. Drive into the data-engineering-challenge directory:
+5. Drive into the Data-Engineer-Project directory:
 
 ````
-cd data-engineering-challenge
+cd Data-Engineer-Project
 ````
 
 6. Run the commands to start the containers (make sure you are in the same directory of docker-compose.yaml):
@@ -37,11 +37,11 @@ docker-compose up
 7. In the config, airflow is running in the port 8080 with user admin and password admin.
 8. Find the DAG trips-processing and click on the Play Button and after in Trigger Dag.
 9. Wait for the DAG sensor starts to listen to the HDFS directory.
-10. If you are using Linux, open another terminal, drive into the data-engineering-challenge folder and run the command:
+10. If you are using Linux, open another terminal, drive into the Data-Engineer-Project folder and run the command:
 ````
 make add-file
 ````
-If you are using Windows, drive into the data-engineering-challenge and run the .bat:
+If you are using Windows, drive into the Data-Engineer-Project and run the .bat:
 ````
 add-file.bat
 ````
@@ -49,8 +49,8 @@ add-file.bat
 Or just run the commands in your terminal:
 ````
 docker cp dataset\trips.csv hadoop-namenode:\
-docker exec hadoop-namenode powershell.exe -Command "hadoop dfs -mkdir -p hdfs:///data/landing/tripdata/"
-docker exec hadoop-namenode powershell.exe -Command "hadoop fs -copyFromLocal /trips.csv hdfs:///data/landing/tripdata/trips.csv"
+docker exec hadoop-namenode powershell.exe -Command "hadoop dfs -mkdir -p hdfs:///data/landing/datatrip/"
+docker exec hadoop-namenode powershell.exe -Command "hadoop fs -copyFromLocal /trips.csv hdfs:///data/landing/datatrip/trips.csv"
 
 ````
 
@@ -97,7 +97,7 @@ For pyspark:
                               |
                   +-----------v------------+
                   |                        |
-                  |  trip_table_creation   |
+                  |  _table_creation   |
                   |                        |
                   +------------+-----------+
                                |
@@ -105,7 +105,7 @@ For pyspark:
                                |
                   +------------v-----------+
                   |                        |
-                  |   trip_table_loading   |
+                  |   _table_loading   |
                   |                        |
                   +------------------------+
 
@@ -122,9 +122,9 @@ Wait for it to finish the execution.
 docker exec -it jobsity-postgres bash
 psql --username=jobsity
 \c jobsity
-select * from staging_tripdata limit 10;
-select * from tripdata limit 10;
-select * from raw_tripsdata limit 10;
+select * from staging_data limit 10;
+select * from data limit 10;
+select * from raw_data limit 10;
 ````
 
 15.Connect to the API to get weekly avg with a bounding box.
@@ -134,7 +134,7 @@ wget http://localhost:50555/
 ````
 Also, there is a table that can calculate this in the processing time
 ````
-select * from avg_trips_region;
+select * from avg_s_region;
 ````
 
 
@@ -266,9 +266,9 @@ docker exec -it spark-master bash
 
 Also, you can use the HDFS as a store. The ``Makefile`` and ``add-file.bat`` have examples of how to copy files to the hdfs such a csv, it is like:
 ````
-docker cp dataset\trips.csv hadoop-namenode:\
-docker exec hadoop-namenode bash -c "hadoop dfs -mkdir -p hdfs:///data/landing/tripdata/"
-docker exec hadoop-namenode bash -c "hadoop fs -copyFromLocal /trips.csv hdfs:///data/landing/tripdata/trips.csv"
+docker cp dataset\s.csv hadoop-namenode:\
+docker exec hadoop-namenode bash -c "hadoop dfs -mkdir -p hdfs:///data/landing/datatrip/"
+docker exec hadoop-namenode bash -c "hadoop fs -copyFromLocal /trips.csv hdfs:///data/landing/datatrip/trips.csv"
 ````
 
 You just have to pay attention in your OS, the commands can change a bit depending on the OS you are running.
