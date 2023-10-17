@@ -142,7 +142,7 @@ trip_table_creation = PostgresOperator(
 trip_table_loading = PostgresOperator(
     task_id="trip_table_loading",
     postgres_conn_id="postgres_default",
-    sql="INSERT INTO datatrip SELECT * FROM staging_tripdata;",
+    sql="INSERT INTO datatrip SELECT * FROM staging_datatrip;",
     dag=dag
 )
 
