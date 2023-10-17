@@ -187,7 +187,7 @@ Service: hadoop-datanode
 
 ````
 # To do:
-````
+
 1. HashiCorp Vault for Secure Password Management
 Objective: Integrate HashiCorp Vault to securely manage and retrieve server passwords.
 Rationale: Storing passwords in plain text or environment variables is not secure. HashiCorp Vault provides a centralized way to manage secrets and sensitive data.
@@ -232,12 +232,13 @@ deltaTable.alias("old").merge(
 Objective: Implement the entire data pipeline in a cloud infrastructure, as detailed in the subsequent section.
 Rationale: Cloud deployment offers scalability, high availability, and ease of management.
 Steps:
-Choose a cloud provider (AWS, Azure, GCP).
-Provision required services (e.g., Kubernetes, Databases, Storage).
-Deploy the application and data pipeline components.
-Test for performance and reliability.
-````
+- Choose a cloud provider (AWS, Azure, GCP).
+- Provision required services (e.g., Kubernetes, Databases, Storage).
+- Deploy the application and data pipeline components.
+- Test for performance and reliability.
+
 Azure Infrastructure
+![Infrastructure on Azure](/img/Azure.png)
 For deploying this pipeline on Azure, the architecture would be as follows:
 - Airflow on AKS: Deploy Apache Airflow on Azure Kubernetes Service (AKS) for orchestration.
 - Azure Blob Storage: Use Azure Blob Storage as the data lake for raw and processed data.
