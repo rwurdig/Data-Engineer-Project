@@ -20,8 +20,8 @@ def main():
     namenode = "hadoop-namenode:8020"
 
     # First task
-    preprocess_trips = spark.read.format("parquet").load(f"hdfs://{namenode}/data/silver/tripdata/")
-    write_to_postgres(preprocess_trips, "staging_tripdata")
+    preprocess_trips = spark.read.format("parquet").load(f"hdfs://{namenode}/data/silver/datatrip/")
+    write_to_postgres(preprocess_trips, "staging_datatrip")
     logger.info("Finished first task")
 
     # Second task
@@ -30,8 +30,8 @@ def main():
     logger.info("Finished second task")
 
     # Delivering raw-data
-    raw_data_trips = spark.read.format("parquet").load(f"hdfs://{namenode}/data/silver/rawtripdata/")
-    write_to_postgres(raw_data_trips, "raw_tripsdata")
+    raw_data_trip = spark.read.format("parquet").load(f"hdfs://{namenode}/data/silver/rawdatatrip/")
+    write_to_postgres(raw_data_trips, "raw_datatrip")
     logger.info("Finished delivering raw data")
 
 if __name__ == "__main__":
