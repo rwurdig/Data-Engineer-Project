@@ -10,10 +10,11 @@ import psycopg2
 
 # Parameters
 spark_master = "spark://spark-master:7077"
-spark_app_name = "Trips Process"
+spark_app_name = "datatrip_ingestion"
 
 # DAG Definition
 now = datetime.now()
+
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -94,7 +95,7 @@ validate_operator = PythonOperator(
     dag=dag,
 )
 
-# HDFS Sensor
+# HDFS Sensor to monitor file arrival in HDFS
 landing_zone = HdfsSensor(
     task_id='landing_zone',
     filepath='/data/raw/datatrip',
@@ -102,7 +103,7 @@ landing_zone = HdfsSensor(
     dag=dag
 )
 
-# Spark Jobs
+# Spark Job for data preprocessing
 second_layer_processing_job = SparkSubmitOperator(
     task_id="second_layer_processing_job",
     application="/usr/local/spark/app/second_layer_processing_job.py",
@@ -131,7 +132,22 @@ third_layer_processing_job = SparkSubmitOperator(
     dag=dag
 )
 
-# Postgres Operators
+# Spark Job for data ingestion into Postgres
+postgre_ingestion_job = SparkSubmitOperator(
+    task_id="postgre_ingestion_job",
+    application="/usr/local/spark/app/postgre_ingestion_job.py",
+    name=spark_app_name,
+    conn_id="spark_default",
+    verbose=1,
+    conf={"spark.master":spark_master},
+    jars="/opt/postgresql-42.3.5.jar",
+    application_args=[],
+    executor_memory="2G",
+    executor_cores=1,
+    num_executors=1,
+    dag=dag)
+
+# Task to create the datatrip table in Postgres
 trip_table_creation = PostgresOperator(
     task_id="trip_table_creation",
     postgres_conn_id="postgres_default",
@@ -139,13 +155,13 @@ trip_table_creation = PostgresOperator(
     dag=dag
 )
 
+# Task to move the data from the staging_datatrip to the datatrip table
 trip_table_loading = PostgresOperator(
     task_id="trip_table_loading",
     postgres_conn_id="postgres_default",
-    sql="INSERT INTO datatrip SELECT * FROM staging_datatrip;",
+    sql="INSERT INTO tripdata SELECT region, ST_GeomFromText(origin_coord, 4326), ST_GeomFromText(destination_coord, 4326), time_of_day, trips FROM staging_tripdata;",
     dag=dag
 )
 
 # DAG dependencies
-landing_zone >> second_layer_processing_job >> third_layer_processing_job >> trip_table_creation >> trip_table_loading >> validate_operator
-start_operator >> ingest_operator >> validate_operator >> end_operator
+landing_zone >> second_layer_processing_job >> third_layer_processing_job >> postgre_ingestion_job >> trip_table_creation >> trip_table_loading
