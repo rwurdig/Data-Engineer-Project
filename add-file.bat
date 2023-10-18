@@ -5,7 +5,7 @@ setlocal
 set DATASET_DIR=dataset
 set CSV_FILE=trips.csv
 set DOCKER_CONTAINER=hadoop-namenode
-set HDFS_DIR=hdfs:///data/landing/tripdata/
+set HDFS_DIR=hdfs:///data/landing/datatrip/
 
 :: Check if the dataset directory exists
 if not exist "%DATASET_DIR%\" (
