@@ -259,9 +259,13 @@ For deploying this pipeline on Azure, the architecture would be as follows:
 - Azure Data Factory: For additional data orchestration and ETL processes, Azure Data Factory can be integrated into the pipeline.
 By adopting this architecture, you can build a robust, scalable, and cost-effective data pipeline on Azure.
 # Bonus features
+
 • The solution is containerized
+
 • There are a cloud solution.
+
 • There is a directory called SQL in the root of the project with both .sql files answering the questions:
+
 ````
 From the two most commonly appearing regions, which is the latest datasource?
 
