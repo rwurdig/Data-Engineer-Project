@@ -190,7 +190,9 @@ Service: hadoop-datanode
 
 1. HashiCorp Vault for Secure Password Management
 Objective: Integrate HashiCorp Vault to securely manage and retrieve server passwords.
+
 Rationale: Storing passwords in plain text or environment variables is not secure. HashiCorp Vault provides a centralized way to manage secrets and sensitive data.
+
 Steps:
 - Create a Docker container running HashiCorp Vault.
 - Initialize and unseal the Vault.
@@ -202,7 +204,9 @@ docker run --name vault -p 8200:8200 vault
 ````
 2. Upgrade to Delta-Table Format
 Objective: Migrate from Parquet to Delta-Table format and implement mergeSchema.
+
 Rationale: Delta-Tables provide ACID transactions, improve data reliability, and allow schema evolution.
+
 Steps:
 - Convert existing Parquet tables to Delta-Table format.
 - Implement mergeSchema to automatically update table schemas when new columns are added.
@@ -214,7 +218,9 @@ DeltaTable.convertToDelta(spark, "parquet.`/path/to/table`")
 ````
 3. Implement Incremental Loads
 Objective: Transition from full data loads to incremental data loads.
+
 Rationale: Loading all data at every execution is inefficient and time-consuming. Incremental loads will improve performance.
+
 Steps:
 - Identify a column (e.g., timestamp or ID) that can be used to filter new records.
 - Modify the ETL process to only load records that are new or updated since the last run.
@@ -230,15 +236,18 @@ deltaTable.alias("old").merge(
 ````
 4. Cloud Infrastructure Deployment
 Objective: Implement the entire data pipeline in a cloud infrastructure, as detailed in the subsequent section.
+
 Rationale: Cloud deployment offers scalability, high availability, and ease of management.
+
 Steps:
 - Choose a cloud provider (AWS, Azure, GCP).
 - Provision required services (e.g., Kubernetes, Databases, Storage).
 - Deploy the application and data pipeline components.
 - Test for performance and reliability.
 
-Azure Infrastructure
-![Infrastructure on Azure](/img/Azure.png)
+# Azure Infrastructure
+![Infrastructure on Azure](/img/Azure%20Architecture.png)
+
 For deploying this pipeline on Azure, the architecture would be as follows:
 - Airflow on AKS: Deploy Apache Airflow on Azure Kubernetes Service (AKS) for orchestration.
 - Azure Blob Storage: Use Azure Blob Storage as the data lake for raw and processed data.
