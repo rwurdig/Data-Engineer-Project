@@ -31,7 +31,7 @@ def main():
 
     # Delivering raw-data
     raw_data_trip = spark.read.format("parquet").load(f"hdfs://{namenode}/data/silver/rawdatatrip/")
-    write_to_postgres(raw_data_trips, "raw_datatrip")
+    write_to_postgres(raw_data_trip, "raw_datatrip")
     logger.info("Finished delivering raw data")
 
 if __name__ == "__main__":
