@@ -39,7 +39,6 @@ docker-compose up -d
 9. Activate HDFS Sensor: Wait until the DAG sensor starts listening to the HDFS directory for incoming data.
 10. Data Ingestion:
 Linux: Open another terminal, navigate to the Data-Engineer-Project directory, and run the appropriate script.
-Windows: Navigate to the Data-Engineer-Project directory and execute the .bat file.
 ````
 # Run the data ingestion script
 ./your-script.sh  # For Linux
