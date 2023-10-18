@@ -12,11 +12,11 @@ if __name__ == "__main__":
 
     # Read CSV from landing zone
     trips_df = spark.read.csv(
-        f"hdfs://{namenode}/data/landing/tripdata/",
+        f"hdfs://{namenode}/data/landing/datatrip/",
         header=True,
         inferSchema=True
     )
 
     # Write to bronze layer as Parquet
-    bronze_path = f"hdfs://{namenode}/data/bronze/tripdata/"
+    bronze_path = f"hdfs://{namenode}/data/bronze/datatrip/"
     write_to_hdfs(trips_df, bronze_path)
